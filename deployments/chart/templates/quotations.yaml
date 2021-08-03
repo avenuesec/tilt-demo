@@ -1,0 +1,109 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quotations
+  namespace: {{.Release.Namespace | quote }}
+  labels:
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    release: {{ .Release.Name | quote }}
+    app: quotations
+spec:
+  selector:
+    matchLabels:
+      app: quotations
+  replicas: {{ .Values.image.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: quotations
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app: quotations
+              topologyKey: kubernetes.io/hostname
+      containers:
+        - name: quotations
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - ./quotations
+          ports:
+          - name: http
+            containerPort:  9200
+          env:
+            - name: POSTGRES_HOST
+              value: {{ .Release.Name }}-postgresql
+
+            - name: POSTGRES_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: tilt-demo
+                  key: POSTGRES_PORT
+
+            - name: POSTGRES_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: tilt-demo
+                  key: POSTGRES_USERNAME
+
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: tilt-demo
+                  key: POSTGRES_PASSWORD
+
+            - name: POSTGRES_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: tilt-demo
+                  key: POSTGRES_DATABASE
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: quotations
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    release: {{ .Release.Name | quote }}
+    app: quotations
+spec:
+  type: NodePort
+  ports:
+  - port: 9200
+    targetPort: 9200
+  selector:
+    app: quotations
+---
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: quotations
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    release: {{ .Release.Name | quote }}
+    app: quotations
+spec:
+   maxReplicas: 10
+   minReplicas: {{ .Values.image.replicaCount }}
+   scaleTargetRef:
+     apiVersion: apps/v1
+     kind: Deployment
+     name: quotations
+   metrics:
+   - type: Resource
+     resource:
+       name: cpu
+       targetAverageUtilization: 70
+---

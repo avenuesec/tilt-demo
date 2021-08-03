@@ -1,0 +1,48 @@
+version: '3.8'
+
+volumes:
+  postgres:
+
+services:
+  postgres:
+    image: postgres
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_DB=tilt
+      - POSTGRES_USER=tilt
+      - POSTGRES_PASSWORD=tilt
+    volumes:
+      - postgres:/var/lib/postgresql/data
+
+  quotations:
+    image: golang:1.16
+    command: go run services/quotations/cmd/main.go
+    ports:
+      - 9200:9200
+    links:
+      - postgres:postgres
+    env_file: .env
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DATABASE=tilt
+      - POSTGRES_USERNAME=tilt
+      - POSTGRES_PASSWORD=tilt
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+
+  btc:
+    image: golang:1.16
+    command: go run services/btc/cmd/main.go
+    ports:
+      - 9201:9201
+    links:
+      - quotations:quotations
+    env_file: .env
+    environment:
+      - QUOTATIONS_HOST=quotations:9200
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+  

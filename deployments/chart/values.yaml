@@ -1,0 +1,13 @@
+replicaCount: 1
+
+image:
+  repository: tilt-demo
+  pullPolicy: IfNotPresent
+  tag: latest
+
+postgresql:
+  enabled: true
+  postgresqlUsername: tilt
+  postgresqlPassword: tilt
+  postgresqlDatabase: tilt
+  postgresqlPort: 5432
