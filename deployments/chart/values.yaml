@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: tilt-demo
+  repository: demo
   pullPolicy: IfNotPresent
   tag: latest
 

@@ -33,7 +33,7 @@ spec:
               topologyKey: kubernetes.io/hostname
       containers:
         - name: btc
-          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          image: {{ .Values.image.repository }}-btc:{{ .Values.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
             - ./btc
@@ -43,6 +43,8 @@ spec:
           env:
             - name: QUOTATIONS_HOST
               value: quotations:9200
+            - name: BTC_HOST
+              value: :9201
 ---
 apiVersion: v1
 kind: Service

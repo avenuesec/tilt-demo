@@ -9,7 +9,6 @@ import (
 	"github.com/avenuesec/tilt-demo/services/btc/internal/service"
 	"github.com/caarlos0/env/v6"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 )
 
 var (
@@ -17,7 +16,6 @@ var (
 )
 
 func init() {
-	godotenv.Load("local.env")
 	env.Parse(cfg)
 }
 

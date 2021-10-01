@@ -1,8 +1,16 @@
-docker_build('tilt-demo', '.', 
-    dockerfile='deployments/docker/Dockerfile')
+docker_build('demo-btc', '.', 
+  dockerfile='deployments/docker/Dockerfile',
+  build_args={'service': 'btc'},
+  only=['pkg', 'services/btc', 'go.mod', 'go.sum'],
+)
 
-yaml = helm('deployments/chart',
-  name='tilt-demo')
+docker_build('demo-quotations', '.', 
+  dockerfile='deployments/docker/Dockerfile',
+  build_args={'service': 'quotations'},
+  only=['pkg', 'services/quotations', 'go.mod', 'go.sum'],
+)
+
+yaml = helm('deployments/chart', name='demo')
 
 k8s_yaml(yaml)
 

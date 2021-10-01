@@ -11,7 +11,6 @@ import (
 	"github.com/caarlos0/env/v6"
 
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -21,7 +20,6 @@ var (
 )
 
 func init() {
-	godotenv.Load("local.env")
 	env.Parse(cfg)
 }
 
